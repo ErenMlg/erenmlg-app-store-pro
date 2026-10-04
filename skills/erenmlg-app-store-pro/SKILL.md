@@ -18,7 +18,7 @@ Never pass the screenshot through an image-generation model and present the resu
 
 On a first run, go in this order. Do not ask anything before step 3, and do not render or record anything before the plan is approved in step 5.
 
-1. **Analyze the project — no questions yet.** Read the README, the manifest (`pubspec.yaml`, `package.json`, `build.gradle`, `Info.plist`), the app name that ships, the UI languages it has (English decides the video language — see **Language** under **Store videos**), its screens and main flow, what needs an account or a backend, whether a fresh install seeds example data, and how it builds. Look for raw screenshots in the folder the user names, else `raw/`; note platform, brand colours and what each screen shows. Check pixel size: below ~1000 px wide a shot would be upscaled and look soft.
+1. **Analyze the project — no questions yet.** Read the README, the manifest (`pubspec.yaml`, `package.json`, `build.gradle`, `Info.plist`), the app name that ships, the UI languages it has (English decides the video language — see **Language** under **Store videos**), its screens and main flow, what needs an account or a backend, whether a fresh install seeds example data, and how it builds. Look for raw screenshots in the folder the user names, else `raw/`; note platform, brand colours and what each screen shows. Check pixel size: below ~1000 px wide a shot would be upscaled and look soft. Find the app icon at its largest: the iOS `AppIcon.appiconset` 1024 px file, the `flutter_launcher_icons` source, or Android's `ic_launcher-playstore.png` (512 px) — not a 192 px mipmap.
 2. **Write the store documents.** The listing text for both stores, in English unless the user names another language, together with the identifiers the consoles ask for first: the Google Play package name and the App Store App ID registration — description, explicit bundle ID, and which Capabilities, App Services and Capability Requests to tick, each with the evidence from the project. See **Store listing text** and `references/listing-guide.md` → **Identifiers and the App ID registration**. Validate with `scripts/listing.mjs`. Then the privacy policy page — see **Privacy policy page**. Show the user where everything is.
 3. **Ask once, in one message:**
    - **Video style** — offer these five as a numbered list with their one-line description, plus a sixth line: "or describe your own":
@@ -55,7 +55,7 @@ Requirements: Node 18+ and a Chromium-based browser (Chrome, Chromium, Edge, or 
 
 ### Config reference
 
-Top level: `targets` (which store sizes to render — default `["apple/iphone", "google/phone"]`; see **Targets**), `out_root` (where the `store/` tree is written — default beside the config; point it at the app's project folder), optional `template`, `theme`, `images`.
+Top level: `targets` (which store sizes to render — default `["apple/iphone", "google/phone"]`; see **Targets**), `out_root` (where the `store/` tree is written — default beside the config; point it at the app's project folder), optional `template`, `theme`, `images`, `icon`, `feature_graphic` (see **App icon and feature graphic**).
 
 Theme keys (each can be overridden inside a single image entry):
 
@@ -95,7 +95,17 @@ Default: `["apple/iphone", "google/phone"]`. The rest are opt-in:
 
 Output lands in `store/apple/iphone/`, `store/google/phone/`, etc. **Set `out_root` to the app's project folder** so the `store/` tree is created there, not next to the config. Every target reuses the same screenshots, headlines, callouts and theme; only the canvas size and frame change.
 
-**Not covered:** the Play Store feature graphic (1024×500 promo banner) and app icon (512×512) are not screenshots — a banner and an icon with their own layout — and are out of this skill's scope.
+## App icon and feature graphic
+
+Add both keys to the same `set.json`; `render.mjs` writes them next to the screenshots:
+
+```json
+"icon": "../assets/icon/app.png",
+"feature_graphic": { "name": "Reword", "tagline": "Say it *better*." }
+```
+
+- `icon` — the app's square logo, 1024 px or larger. Written as `store/apple/icon.png` (1024×1024) and `store/google/icon.png` (512×512, under 1 MB), both opaque RGB: transparent areas get the theme's `bg`, because App Store Connect rejects an icon with alpha. The logo is resized only, never redrawn.
+- `feature_graphic` — the Google Play 1024×500 banner (PNG, no alpha, under 15 MB), `store/google/feature-graphic.png`: the icon, the app `name` and a short `tagline` (`*text*` = accent) centred on the theme background. Play crops its edges and puts a play button over the centre when a promo video is set, so keep the tagline to a few words. Needs `icon`. For another layout, edit `assets/feature.html`.
 
 ## Rotation
 
@@ -248,6 +258,7 @@ Paths are relative to `video.json`. The script writes a HyperFrames project per 
 - In `dual` mode, neither phone clips the canvas edge and the overlap doesn't hide key UI on the back phone.
 - With `rotation`, the tilt doesn't foreshorten important edge content off-screen.
 - Output size matches the target store; no alpha channel.
+- If `icon` was set: no "upscaled" warning, and the feature graphic's name and tagline read at a glance.
 - Files numbered in gallery order; the user knows where the config is so they can edit copy and re-render.
 - If listing text was written: `listing.mjs` exits 0, every claim matches what the app does today, and the user knows which age rating answers to confirm.
 - If videos were made: `video.mjs` printed no warnings; you looked at one frame per second of every film and at full-frame-rate strips across every cut and every effect (effects visibly move and land on the element they explain); no cut shows a system picker, personal photos, a keyboard on the App Store preview, or a half-finished transition; the App Store preview is screen recordings only with the phone's bars cut; the films are in English unless the user asked otherwise; and the phone was put back the way you found it.

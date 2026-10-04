@@ -31,5 +31,7 @@
       "sub": "Beautiful in both, switches with your phone.",
       "out": "02-dual.png"
     }
-  ]
+  ],
+  "icon": "assets/icon.png",
+  "feature_graphic": { "name": "MyApp", "tagline": "One app, *all of it*." }
 }

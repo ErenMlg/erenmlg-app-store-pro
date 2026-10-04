@@ -24,10 +24,16 @@ listing.json (either store section may be left out):
           "capabilities": [ { "name": "Sign In with Apple", "why": "sign_in_with_apple in pubspec" } ],
           "app_services": [],             e.g. WeatherKit, MusicKit, ShazamKit
           "capability_requests": []       capabilities Apple must approve first
-        }
+        },
+        "permissions": [                  Info.plist purpose strings; [] when none
+          { "name": "NSCameraUsageDescription", "text": "Scan receipts to add expenses.",
+            "why": "image_picker in pubspec" } ]
       },
       "google": { "name": "...", "short_description": "...", "full_description": "...",
-                  "package": "com.example.app" }    applicationId; fixed forever once uploaded
+                  "package": "com.example.app",     applicationId; fixed forever once uploaded
+                  "permissions": [                  merged release manifest; [] when none
+                    { "name": "android.permission.CAMERA", "why": "image_picker in pubspec",
+                      "declaration": "" } ] }       Play Console form it needs, if any
     }
 
 Lengths are counted in characters (Unicode code points), as both consoles do.
@@ -106,6 +112,15 @@ function check(listing) {
     if (!pkg) errors.push('Google Play package name is missing (the applicationId in build.gradle)');
     else if (!PACKAGE.test(pkg)) errors.push(`Google Play package name "${pkg}" is not a valid applicationId`);
   }
+  for (const store of ['apple', 'google']) {
+    if (!listing[store]) continue;
+    const permissions = listing[store].permissions;
+    if (!Array.isArray(permissions)) errors.push(`${STORE[store]} permissions are missing; list them, or [] when the app needs none`);
+    else for (const item of permissions) {
+      if (!item?.name || !item?.why) errors.push(`every ${STORE[store]} permission needs a "name" and the "why" that justifies it`);
+      else if (store === 'apple' && !item.text) errors.push(`${item.name} needs the purpose "text" the user sees`);
+    }
+  }
   if (listing.apple) {
     const id = apple.app_id;
     if (!id) errors.push('App Store app_id is missing (description, bundle_id, capabilities)');
@@ -161,6 +176,17 @@ function toMarkdown(listing) {
       for (const [question, answer] of Object.entries(section.age_rating.answers || {})) out.push(`| ${question} | ${answer} |`);
       out.push('');
     }
+    if (section.permissions) {
+      out.push('### Permissions', '');
+      if (!section.permissions.length) out.push('None.', '');
+      else if (store === 'apple') {
+        out.push('| Info.plist key | Purpose text | Why |', '|---|---|---|',
+          ...section.permissions.map(p => `| \`${p.name}\` | ${p.text} | ${p.why} |`), '');
+      } else {
+        out.push('| Permission | Why | Play Console declaration |', '|---|---|---|',
+          ...section.permissions.map(p => `| \`${p.name}\` | ${p.why} | ${p.declaration || '—'} |`), '');
+      }
+    }
   }
   return out.join('\n');
 }
@@ -193,6 +219,13 @@ function toText(listing) {
     if (section.age_rating) {
       out.push(`[Age Rating] ${section.age_rating.result}`);
       for (const [question, answer] of Object.entries(section.age_rating.answers || {})) out.push(`${question}: ${answer}`);
+      out.push('');
+    }
+    if (section.permissions) {
+      out.push(section.permissions.length ? '[Permissions]' : '[Permissions] none');
+      for (const p of section.permissions) {
+        out.push(`${p.name}${p.text ? `: ${p.text}` : ''}${p.declaration ? ` (declare: ${p.declaration})` : ''}`);
+      }
       out.push('');
     }
   }

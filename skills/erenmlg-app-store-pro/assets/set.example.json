@@ -1,0 +1,35 @@
+{
+  "targets": ["apple/iphone", "google/phone"],
+  "out_root": ".",
+  "theme": {
+    "bg": "#1b1145",
+    "accent": "#7c3aed",
+    "accent2": "#f3c969",
+    "frame": "silver",
+    "headline_font": "\"Inter\", system-ui, sans-serif",
+    "headline_weight": 800,
+    "font_links": ["https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&display=swap"],
+    "headline_lines": 2,
+    "sub_lines": 2
+  },
+  "images": [
+    {
+      "screenshot": "raw/home.png",
+      "rotation": "left",
+      "eyebrow": "AT A GLANCE",
+      "headline": "One app,\nall of it.",
+      "sub": "Everything you need in one place.",
+      "callouts": [{"text": "Works offline", "at": "mid-right"}],
+      "out": "01-home.png"
+    },
+    {
+      "screenshot": "raw/light.png",
+      "screenshot2": "raw/dark.png",
+      "mode": "dual",
+      "eyebrow": "TWO THEMES",
+      "headline": "Light\nor dark.",
+      "sub": "Beautiful in both, switches with your phone.",
+      "out": "02-dual.png"
+    }
+  ]
+}

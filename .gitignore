@@ -1,0 +1,9 @@
+# Local planning notes (see CLAUDE.md)
+.planning/
+
+# Sample renders of a real app; regenerate them locally
+skills/erenmlg-app-store-pro/examples/store-out/
+skills/erenmlg-app-store-pro/examples/render.log
+
+node_modules/
+.DS_Store

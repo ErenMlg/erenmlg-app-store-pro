@@ -1,0 +1,94 @@
+{
+  "targets": [
+    "apple/iphone",
+    "google/phone"
+  ],
+  "out_root": ".",
+  "template": "../assets/template.html",
+  "theme": {
+    "bg": "#2b2258",
+    "bg2": "#1b1340",
+    "accent": "#f5b301",
+    "accent2": "#f5b301",
+    "text": "#ffffff",
+    "cutout": false,
+    "headline_font": "\"Inter\", system-ui, sans-serif",
+    "headline_weight": 800,
+    "font_links": [
+      "https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&display=swap"
+    ],
+    "headline_lines": 2,
+    "sub_lines": 2
+  },
+  "images": [
+    {
+      "screenshot": "raw/tur-1.png",
+      "eyebrow": "HOŞ GELDİN",
+      "headline": "Kelime evrenin\nburada.",
+      "sub": "Her gün yeni kelimeler seni bekliyor.",
+      "out": "01-giris.png",
+      "rotation": "subtle"
+    },
+    {
+      "screenshot": "raw/10-ana-ekran.png",
+      "eyebrow": "KELİME GALAKSİN",
+      "headline": "Kelime çek,\nöğren.",
+      "sub": "Fanusun her gün yeni kelimelerle dolsun.",
+      "callouts": [
+        {
+          "text": "Çevrimdışı çalışır",
+          "at": "mid-right"
+        }
+      ],
+      "out": "02-ana.png",
+      "rotation": "left"
+    },
+    {
+      "screenshot": "raw/14-quiz.png",
+      "eyebrow": "MİNİ QUIZ",
+      "headline": "Test et,\npekiştir.",
+      "sub": "Bildiğini yaz, gerisini uygulama takip etsin.",
+      "out": "03-quiz.png",
+      "rotation": "right"
+    },
+    {
+      "screenshot": "raw/15-istatistikler.png",
+      "eyebrow": "İSTATİSTİK",
+      "headline": "İlerlemeni\ngör.",
+      "sub": "Serini uzat, gelişimini izle.",
+      "out": "04-istatistik.png",
+      "rotation": "subtle"
+    },
+    {
+      "screenshot": "raw/17-rozetler.png",
+      "eyebrow": "BAŞARILAR",
+      "headline": "Rozet topla,\nmotive ol.",
+      "sub": "Öğrendikçe yeni rozetler açılır.",
+      "out": "05-rozet.png",
+      "rotation": "left"
+    },
+    {
+      "screenshot": "raw/18-kendi-kelimelerim.png",
+      "eyebrow": "KİŞİSEL",
+      "headline": "Kendi\nkelimelerin.",
+      "sub": "İstediğin kelimeleri ekle, sana özel çalış.",
+      "out": "06-kendi-kelimelerim.png",
+      "rotation": "right"
+    },
+    {
+      "screenshot": "raw/22-premium-planlar.png",
+      "eyebrow": "PREMIUM",
+      "headline": "Sınırsız\nöğren.",
+      "sub": "Tüm özellikler tek planda.",
+      "callouts": [
+        {
+          "text": "Reklamsız",
+          "at": "top-left",
+          "accent": true
+        }
+      ],
+      "out": "07-premium.png",
+      "rotation": "subtle"
+    }
+  ]
+}

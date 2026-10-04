@@ -1,0 +1,16 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-marketplace.json",
+  "name": "erenmlg-app-store-pro",
+  "description": "Store screenshots, listing text and store videos for App Store and Google Play.",
+  "owner": {
+    "name": "Eren Mollaoğlu"
+  },
+  "plugins": [
+    {
+      "name": "erenmlg-app-store-pro",
+      "description": "App Store and Google Play launch kit: screenshots, icon, feature graphic, listing, privacy page and videos.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

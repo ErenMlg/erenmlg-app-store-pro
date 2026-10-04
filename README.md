@@ -66,12 +66,23 @@ a store video or a listing). Nothing is rendered or recorded before the plan is 
 
 ## Install
 
+As a Claude Code plugin, from this repository's marketplace:
+
+```bash
+claude plugin marketplace add ErenMlg/erenmlg-app-store-pro
+claude plugin install erenmlg-app-store-pro@erenmlg-app-store-pro
+```
+
+Update later with `claude plugin marketplace update erenmlg-app-store-pro && claude plugin update erenmlg-app-store-pro@erenmlg-app-store-pro`.
+
+Or copy the skill by hand:
+
 ```bash
 git clone https://github.com/ErenMlg/erenmlg-app-store-pro.git
 cp -r erenmlg-app-store-pro/skills/erenmlg-app-store-pro ~/.claude/skills/
 ```
 
-Claude Code picks the skill up on the next session. It shows up as `erenmlg-app-store-pro`.
+Claude Code picks it up on the next session. As a plugin it shows up as `erenmlg-app-store-pro:erenmlg-app-store-pro`, copied by hand as `erenmlg-app-store-pro`.
 
 ## Requirements
 

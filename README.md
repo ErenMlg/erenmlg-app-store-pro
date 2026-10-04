@@ -11,7 +11,8 @@ App Store and Google Play ask for before launch:
 - **A privacy policy page** — rendered from Markdown into a styled, self-contained page and published with
   GitHub Pages, so it never has to be restyled by hand in a site builder.
 - **Store screenshots** — the app's real screenshots, pixel-exact, in a device frame on a themed background
-  with a headline, for every App Store and Google Play size.
+  with a headline, for every App Store and Google Play size, plus the app icon for both stores and the
+  Google Play feature graphic (1024×500).
 - **Store videos** — the skill installs the app on a phone or emulator, drives it over adb, records the real
   flow, and cuts a storyboarded film in one of five motion styles, with effects that follow what happens on
   screen. Three files per language: a Google Play promo, an App Store app preview (screen captures only, as
@@ -153,6 +154,8 @@ The screen itself is never zoomed: scaling a recording up softens the app's text
 │   ├── listing.json · listing.md · listing.txt     # listing + identifiers + capabilities
 │   ├── privacy-policy.md
 │   ├── apple/iphone/*.png   google/phone/*.png     # screenshots per target
+│   ├── apple/icon.png   google/icon.png            # app icon, 1024 and 512 px
+│   ├── google/feature-graphic.png                  # Play feature graphic, 1024×500
 │   ├── google/video/promo.mp4                      # Google Play promo (upload to YouTube)
 │   ├── apple/video/preview.mp4                     # App Store app preview (886×1920, 15–30 s)
 │   ├── apple/video/promo.mp4                       # iPhone-size marketing film (not for App Store Connect)

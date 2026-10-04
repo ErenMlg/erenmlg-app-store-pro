@@ -32,8 +32,16 @@ set.json (renders into <out_root>/store/<target>/, e.g. store/apple/iphone/):
         {"screenshot": "raw/home.png", "headline": "Art history,\n*made playable.*",
          "sub": "Optional one-sentence subheadline.",
          "pattern": "rings", "scene_vars": {"seed": 4}, "out": "01-home.png"}
-      ]
+      ],
+      "icon": "assets/icon.png",
+      "feature_graphic": {"name": "Reword", "tagline": "Say it *better*."}
     }
+
+"icon" (optional) is the app's square logo, 1024 px or larger. It is written to
+store/apple/icon.png (1024x1024) and store/google/icon.png (512x512), opaque:
+transparent areas get the theme's bg. "feature_graphic" (optional, needs "icon")
+renders the Google Play 1024x500 banner to store/google/feature-graphic.png with
+the icon, "name" and "tagline" (*text* = accent) on the theme background.
 
 Headline markup: "\n" is a line break, *text* gets the accent treatment.
 Any theme key can be overridden per image. Paths may be absolute, start with
@@ -85,8 +93,8 @@ const ROTATIONS = new Set(['flat', 'subtle', 'left', 'right', 'dual']);
 
 // Store screenshot targets. Each renders the whole set at that canvas size into
 // <out_root>/store/<dir>/. Apple wants specific device sizes; Google Play accepts any
-// 9:16 portrait within its bounds. Feature graphics and app icons are NOT here — they
-// are a banner and an icon, not screenshots, and need their own tooling.
+// 9:16 portrait within its bounds. The app icon and the feature graphic are not
+// screenshots; renderExtras() writes them from the "icon" and "feature_graphic" keys.
 // `bleed` = how much of the phone may run off the bottom. Tall 9:16-ish canvases can
 // afford a big bleed (PocketPal look); a wide canvas (iPad 3:4) must keep it near zero
 // or the phone's lower half gets cut off. Used as the default device_bleed per target.
@@ -140,14 +148,20 @@ function headlineHtml(text) {
     .replace(/\n/g, '<br>');
 }
 
-function buildPage(template, theme, image, baseDir, size) {
-  const t = { ...THEME_DEFAULTS, ...theme };
-  for (const key of Object.keys(THEME_DEFAULTS)) if (key in image) t[key] = image[key];
+// Fill the colors a theme may leave out, derived from bg.
+function deriveColors(t) {
   const dark = isDark(t.bg);
   t.bg2 ??= `color-mix(in srgb, ${t.bg} 72%, ${dark ? '#000' : '#fff'})`;
   t.accent2 ??= t.accent;
   t.text ??= dark ? '#ffffff' : '#111114';
   t.line ??= dark ? 'rgba(255,255,255,.2)' : 'rgba(0,0,0,.1)';
+  return t;
+}
+
+function buildPage(template, theme, image, baseDir, size) {
+  const t = { ...THEME_DEFAULTS, ...theme };
+  for (const key of Object.keys(THEME_DEFAULTS)) if (key in image) t[key] = image[key];
+  deriveColors(t);
 
   const shot = resolvePath(image.screenshot, baseDir);
   if (!fs.existsSync(shot)) fail(`screenshot not found: ${shot}`);
@@ -258,6 +272,64 @@ function checkPng(file, size) {
   return warnings;
 }
 
+// The app icon for both stores and the Play feature graphic, under <projectRoot>/store/.
+async function renderExtras(config, baseDir, skillDir, projectRoot, browser) {
+  if (!config.icon && !config.feature_graphic) return [];
+  if (!config.icon) fail('"feature_graphic" needs "icon"');
+  const iconPath = resolvePath(config.icon, baseDir);
+  if (!fs.existsSync(iconPath)) fail(`icon not found: ${iconPath}`);
+  const icon = pathToFileURL(iconPath).href;
+  const t = deriveColors({ ...THEME_DEFAULTS, ...(config.theme || {}) });
+
+  const iconPage = px => `<!doctype html><html><body style="margin:0;background:${t.bg}">` +
+    `<img src="${icon}" style="display:block;width:${px}px;height:${px}px;object-fit:cover"><script>` +
+    `const i=document.querySelector('img');const r=()=>document.documentElement.setAttribute('data-meta',` +
+    `JSON.stringify({icon_px:i.naturalWidth}));i.complete?r():i.addEventListener('load',r);</script></body></html>`;
+  const jobs = [
+    { out: 'apple/icon.png', size: [1024, 1024], page: iconPage(1024) },
+    { out: 'google/icon.png', size: [512, 512], page: iconPage(512) },
+  ];
+  if (config.feature_graphic) {
+    const { name, tagline = '' } = config.feature_graphic;
+    if (!name) fail('"feature_graphic" needs "name"');
+    const values = {
+      BG: t.bg, BG2: t.bg2, ACCENT: t.accent, ACCENT2: t.accent2, TEXT: t.text,
+      HEADLINE_FONT: t.headline_font, HEADLINE_WEIGHT: t.headline_weight, EM_STYLE: t.em_style,
+      FONT_LINKS: t.font_links.map(u => `<link rel="stylesheet" href="${escapeHtml(u)}">`).join('\n'),
+      ICON: icon, NAME: escapeHtml(name), TAGLINE_HTML: headlineHtml(tagline),
+    };
+    let page = fs.readFileSync(path.join(skillDir, 'assets', 'feature.html'), 'utf8');
+    for (const [key, value] of Object.entries(values)) page = page.split(`{{${key}}}`).join(String(value));
+    jobs.push({ out: 'google/feature-graphic.png', size: [1024, 500], page });
+  }
+
+  const storeDir = path.join(projectRoot, 'store');
+  fs.mkdirSync(storeDir, { recursive: true });
+  const workDir = fs.mkdtempSync(path.join(storeDir, '.work-'));
+  const results = [];
+  try {
+    for (const [index, job] of jobs.entries()) {
+      const out = path.join(storeDir, job.out);
+      fs.mkdirSync(path.dirname(out), { recursive: true });
+      fs.rmSync(out, { force: true });
+      const pagePath = path.join(workDir, `extra-${index + 1}.html`);
+      fs.writeFileSync(pagePath, job.page);
+      const { dom, jsErrors } = await chrome(browser, workDir, job.size, pathToFileURL(pagePath).href, out);
+      if (!fs.existsSync(out)) fail(`browser produced no image for ${job.out}`);
+      const match = /data-meta="([^"]+)"/.exec(dom);
+      const meta = match ? JSON.parse(match[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&')) : {};
+      const warnings = [...checkPng(out, job.size), ...jsErrors.map(e => `page script error: ${e}`)];
+      if (!meta.icon_px) warnings.push('icon did not load; check the icon path and format');
+      else if (job.out.endsWith('icon.png') && meta.icon_px < job.size[0]) warnings.push(`icon was upscaled from ${meta.icon_px} px; use a 1024 px source`);
+      if (job.out === 'google/icon.png' && fs.statSync(out).size > 1024 * 1024) warnings.push('over 1 MB; Google Play rejects larger icons');
+      results.push({ target: 'extra', out, canvas: job.size, ...meta, warnings });
+    }
+  } finally {
+    fs.rmSync(workDir, { recursive: true, force: true });
+  }
+  return results;
+}
+
 async function main() {
   const arg = process.argv[2];
   if (!arg || arg === '-h' || arg === '--help') {
@@ -320,6 +392,7 @@ async function main() {
       fs.rmSync(workDir, { recursive: true, force: true });
     }
   }
+  results.push(...await renderExtras(config, baseDir, skillDir, projectRoot, browser));
   console.log(JSON.stringify(results, null, 2));
 }
 

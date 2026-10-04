@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>feature graphic</title>
+{{FONT_LINKS}}
+<style>
+  /* Google Play feature graphic, 1024x500. Play crops and overlays a play button
+     when a promo video is set, so everything important stays in the centre. */
+  :root { --bg: {{BG}}; --bg2: {{BG2}}; --accent: {{ACCENT}}; --accent2: {{ACCENT2}}; --text: {{TEXT}}; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1024px; height: 500px; overflow: hidden; background: var(--bg); }
+  #canvas { position: relative; width: 1024px; height: 500px; overflow: hidden;
+            display: flex; align-items: center; justify-content: center; gap: 48px;
+            background: linear-gradient(135deg, var(--bg), var(--bg2)); }
+  .glows { position: absolute; inset: 0; background:
+      radial-gradient(40% 60% at 12% 10%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 65%),
+      radial-gradient(40% 60% at 92% 92%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 65%); }
+  .spark { position: absolute; color: var(--accent); line-height: 1; transform: translate(-50%, -50%); opacity: .5;
+           font: 700 30px system-ui, sans-serif; }
+  .spark.d { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); opacity: .4; }
+  .icon { position: relative; width: 200px; height: 200px; border-radius: 44px; flex: none; object-fit: cover;
+          box-shadow: 0 18px 50px rgba(0,0,0,.35); }
+  .copy { position: relative; max-width: 560px; color: var(--text); }
+  h1 { margin: 0; font-family: {{HEADLINE_FONT}}; font-weight: {{HEADLINE_WEIGHT}}; font-size: 84px;
+       line-height: 1; letter-spacing: -.02em; }
+  p { margin: 18px 0 0; font-family: {{HEADLINE_FONT}}; font-size: 34px; line-height: 1.2; opacity: .85; }
+  em { font-style: {{EM_STYLE}}; color: var(--accent2); }
+</style>
+</head>
+<body>
+<div id="canvas">
+  <div class="glows"></div>
+  <span class="spark" style="left:6%;top:18%">+</span>
+  <span class="spark" style="left:94%;top:14%">✦</span>
+  <span class="spark d" style="left:88%;top:80%"></span>
+  <span class="spark d" style="left:10%;top:84%"></span>
+  <img class="icon" src="{{ICON}}" alt="">
+  <div class="copy">
+    <h1>{{NAME}}</h1>
+    <p>{{TAGLINE_HTML}}</p>
+  </div>
+</div>
+<script>
+  const img = document.querySelector('.icon');
+  const report = () => document.documentElement.setAttribute('data-meta', JSON.stringify({ icon_px: img.naturalWidth }));
+  img.complete ? report() : img.addEventListener('load', report);
+</script>
+</body>
+</html>

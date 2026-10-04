@@ -4,7 +4,8 @@ A [Claude Code](https://claude.com/claude-code) skill that turns a mobile app pr
 App Store and Google Play ask for before launch:
 
 - **Store listing documents** — name, subtitle, promotional text, description, keywords, category and age
-  rating answers for the App Store; name, short and full description for Google Play — plus the
+  rating answers for the App Store; name, short and full description for Google Play; the permissions
+  each store needs (iOS purpose strings, Android permissions and their Play Console declarations) — plus the
   **identifiers** the consoles ask for first: the Google Play package name and the App Store App ID
   registration (description, explicit bundle ID, and which Capabilities, App Services and Capability
   Requests to enable, each backed by evidence from the project).

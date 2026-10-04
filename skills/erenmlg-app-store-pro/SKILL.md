@@ -158,7 +158,7 @@ Best first.
 
 The text the store consoles ask for, written from the project itself, never from a template.
 
-**Learn the app first.** Read the README, the manifest (`pubspec.yaml`, `package.json`, `build.gradle`, `Info.plist`), the screenshots, and the headlines you wrote for them. Take the name from what actually ships (Android `android:label`, iOS `CFBundleDisplayName`, the app title in code). Scan the dependencies for ads, web views, chat, and sign-in: the age rating answers depend on them. Ask the user only for what the project can't tell you, such as pricing or what a server does.
+**Learn the app first.** Read the README, the manifest (`pubspec.yaml`, `package.json`, `build.gradle`, `Info.plist`), the screenshots, and the headlines you wrote for them. Take the name from what actually ships (Android `android:label`, iOS `CFBundleDisplayName`, the app title in code). Scan the dependencies for ads, web views, chat, and sign-in: the age rating answers depend on them. List the permissions each store needs — iOS `Info.plist` purpose strings, the Android merged manifest's permissions and any Play Console declaration they trigger — see `references/listing-guide.md` → **Permissions**. Ask the user only for what the project can't tell you, such as pricing or what a server does.
 
 **Write one JSON per language** at `<project>/store/listing.json` (`listing-en.json` for a second language), with only the stores the user chose:
 
@@ -168,8 +168,10 @@ The text the store consoles ask for, written from the project itself, never from
              "category": { "primary": "Finance", "secondary": "Productivity" },
              "age_rating": { "result": "4+", "answers": { "Advertising": "No" } },
              "app_id": { "description": "", "bundle_id": "", "capabilities": [ { "name": "", "why": "" } ],
-                         "app_services": [], "capability_requests": [] } },
-  "google": { "name": "", "short_description": "", "full_description": "", "package": "" } }
+                         "app_services": [], "capability_requests": [] },
+             "permissions": [ { "name": "NSCameraUsageDescription", "text": "", "why": "" } ] },
+  "google": { "name": "", "short_description": "", "full_description": "", "package": "",
+              "permissions": [ { "name": "android.permission.CAMERA", "why": "", "declaration": "" } ] } }
 ```
 
 **Validate and write the files:**

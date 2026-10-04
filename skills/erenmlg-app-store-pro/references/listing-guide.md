@@ -134,3 +134,41 @@ use it, and tell the user to file the request before submission.
 
 Tell the user which capabilities to double-check in the portal, especially anything inferred from a
 package rather than read from an entitlements file.
+
+## Permissions
+
+Both store sections carry a `permissions` list (`[]` when the app needs none), each entry with the
+evidence in `why`. Read them from what the build actually requests, never from what the app might
+need.
+
+**App Store** (`apple.permissions`) — every `NS…UsageDescription` key the app needs in
+`Info.plist`, with the purpose `text` the user sees in the system prompt. Find them in
+`ios/Runner/Info.plist` and in the plugins: `image_picker` → camera and photo library,
+`permission_handler`, `geolocator` → location, `record` → microphone, `local_auth` → Face ID,
+`contacts_service`, `app_tracking_transparency` → `NSUserTrackingUsageDescription`. A key the code
+needs but `Info.plist` lacks crashes the app on first use and gets the build rejected (ITMS-90683),
+so flag any gap as a fix to make in the project. Write the purpose text in the app's language, say
+concretely what the data is for ("Scan receipts to add expenses", not "The app needs the camera"):
+Apple rejects vague purpose strings under Guideline 5.1.1.
+
+**Google Play** (`google.permissions`) — every `<uses-permission>` in the **merged** release
+manifest, since plugins add their own: `build/app/intermediates/merged_manifests/release/` after a
+release build, or `aapt dump permissions app-release.apk`. Leave out normal install-time
+permissions the user never sees (`INTERNET`, `ACCESS_NETWORK_STATE`, `VIBRATE`, `WAKE_LOCK`) only
+when the list gets long, never a dangerous or special one. Set `declaration` for those that need a
+Play Console form before review:
+
+| Permission | Play Console declaration |
+|---|---|
+| `ACCESS_BACKGROUND_LOCATION` | Location permissions declaration + video |
+| `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO` | Photo and video permissions (use the photo picker instead when access is one-off) |
+| `READ_SMS`, `SEND_SMS`, `READ_CALL_LOG` and other SMS / Call Log | Permissions declaration form; default handler only |
+| `MANAGE_EXTERNAL_STORAGE` | All files access declaration |
+| `QUERY_ALL_PACKAGES` | Package visibility declaration |
+| `USE_EXACT_ALARM`, `SCHEDULE_EXACT_ALARM` | Exact alarm declaration (alarm or calendar apps only) |
+| `FOREGROUND_SERVICE_*` (Android 14+) | Foreground service types declaration + video |
+| `BIND_ACCESSIBILITY_SERVICE` | Accessibility API declaration |
+| `REQUEST_INSTALL_PACKAGES` | Request install packages declaration |
+
+A permission no feature uses, often pulled in by a plugin, is better removed from the manifest
+(`tools:node="remove"`) than declared; say so to the user.

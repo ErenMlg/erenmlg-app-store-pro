@@ -18,6 +18,13 @@ listing.json (either store section may be left out):
         "description": "...", "keywords": "comma,separated,no,spaces",
         "category": { "primary": "Finance", "secondary": "Productivity" },
         "age_rating": { "result": "4+", "answers": { "Advertising": "No" } },
+        "privacy_policy_url": "https://owner.github.io/repo/",
+        "price": "Free",                  or base price, e.g. "USD 2.99"
+        "app_privacy": {                  App Privacy label; "data": [] = Data Not Collected
+          "tracking": false,
+          "data": [ { "type": "Email Address", "purposes": ["App Functionality"],
+                      "linked": true, "tracking": false, "why": "supabase_flutter auth" } ]
+        },
         "app_id": {                       Certificates, Identifiers & Profiles → Register an App ID
           "description": "Monysa",        no @ & * "
           "bundle_id": "com.example.app", explicit, reverse-domain, no *
@@ -67,6 +74,8 @@ const CATEGORIES = new Set(['Books', 'Business', 'Developer Tools', 'Education',
   'Food & Drink', 'Games', 'Graphics & Design', 'Health & Fitness', 'Kids', 'Lifestyle', 'Magazines & Newspapers',
   'Medical', 'Music', 'Navigation', 'News', 'Photo & Video', 'Productivity', 'Reference', 'Shopping',
   'Social Networking', 'Sports', 'Travel', 'Utilities', 'Weather']);
+const PRIVACY_PURPOSES = new Set(['Third-Party Advertising', "Developer's Advertising or Marketing", 'Analytics',
+  'Product Personalization', 'App Functionality', 'Other Purposes']);
 
 const len = text => [...text].length;
 // Reverse-domain identifiers. Android segments start with a letter and may use underscores;
@@ -103,6 +112,22 @@ function check(listing) {
   for (const which of ['primary', 'secondary']) {
     const category = apple.category?.[which];
     if (category && !CATEGORIES.has(category)) warnings.push(`${which} category "${category}" is not an App Store category name; check the spelling`);
+  }
+  if (listing.apple) {
+    if (!apple.category?.primary) errors.push('App Store primary category is missing');
+    if (!/^https:\/\/\S+$/.test(apple.privacy_policy_url || '')) errors.push('App Store privacy_policy_url is missing or not an https:// URL');
+    if (!apple.price) errors.push('App Store price is missing ("Free" or a base price such as "USD 2.99")');
+    const privacy = apple.app_privacy;
+    if (!privacy || typeof privacy.tracking !== 'boolean' || !Array.isArray(privacy.data)) {
+      errors.push('App Store app_privacy is missing; give "tracking" (true/false) and "data" ([] = Data Not Collected)');
+    } else for (const item of privacy.data) {
+      if (!item?.type || !item?.why || !Array.isArray(item.purposes) || !item.purposes.length
+        || typeof item.linked !== 'boolean' || typeof item.tracking !== 'boolean') {
+        errors.push('every app_privacy data entry needs "type", "purposes", "linked", "tracking" and the "why" that justifies it');
+      } else for (const purpose of item.purposes) {
+        if (!PRIVACY_PURPOSES.has(purpose)) errors.push(`app_privacy purpose "${purpose}" is not one of: ${[...PRIVACY_PURPOSES].join(', ')}`);
+      }
+    }
   }
   if (apple.age_rating && !AGE_RATINGS.has(apple.age_rating.result)) {
     errors.push(`age rating "${apple.age_rating.result}" is not one of ${[...AGE_RATINGS].join(', ')}`);
@@ -176,6 +201,7 @@ function toMarkdown(listing) {
       for (const [question, answer] of Object.entries(section.age_rating.answers || {})) out.push(`| ${question} | ${answer} |`);
       out.push('');
     }
+    if (store === 'apple') appleConsoleMarkdown(section, out);
     if (section.permissions) {
       out.push('### Permissions', '');
       if (!section.permissions.length) out.push('None.', '');
@@ -189,6 +215,17 @@ function toMarkdown(listing) {
     }
   }
   return out.join('\n');
+}
+
+const yesNo = flag => (flag ? 'Yes' : 'No');
+
+function appleConsoleMarkdown(section, out) {
+  out.push('### Pricing', '', section.price, '', '### Privacy Policy URL', '', section.privacy_policy_url, '');
+  const privacy = section.app_privacy;
+  out.push('### App Privacy', '', `- Tracking: ${yesNo(privacy.tracking)}`, '');
+  if (!privacy.data.length) out.push('Data Not Collected.', '');
+  else out.push('| Data type | Purposes | Linked to user | Tracking | Why |', '|---|---|---|---|---|',
+    ...privacy.data.map(d => `| ${d.type} | ${d.purposes.join(', ')} | ${yesNo(d.linked)} | ${yesNo(d.tracking)} | ${d.why} |`), '');
 }
 
 function toText(listing) {
@@ -219,6 +256,15 @@ function toText(listing) {
     if (section.age_rating) {
       out.push(`[Age Rating] ${section.age_rating.result}`);
       for (const [question, answer] of Object.entries(section.age_rating.answers || {})) out.push(`${question}: ${answer}`);
+      out.push('');
+    }
+    if (store === 'apple') {
+      const privacy = section.app_privacy;
+      out.push(`[Price] ${section.price}`, `[Privacy Policy URL] ${section.privacy_policy_url}`,
+        `[App Privacy] tracking: ${yesNo(privacy.tracking)}${privacy.data.length ? '' : ', Data Not Collected'}`);
+      for (const d of privacy.data) {
+        out.push(`${d.type}: ${d.purposes.join(', ')}; linked: ${yesNo(d.linked)}; tracking: ${yesNo(d.tracking)}`);
+      }
       out.push('');
     }
     if (section.permissions) {

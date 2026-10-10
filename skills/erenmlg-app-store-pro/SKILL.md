@@ -167,6 +167,9 @@ The text the store consoles ask for, written from the project itself, never from
   "apple": { "name": "", "subtitle": "", "promotional_text": "", "description": "", "keywords": "",
              "category": { "primary": "Finance", "secondary": "Productivity" },
              "age_rating": { "result": "4+", "answers": { "Advertising": "No" } },
+             "privacy_policy_url": "https://<owner>.github.io/<repo>/", "price": "Free",
+             "app_privacy": { "tracking": false, "data": [ { "type": "Email Address", "purposes": ["App Functionality"],
+                                                             "linked": true, "tracking": false, "why": "" } ] },
              "app_id": { "description": "", "bundle_id": "", "capabilities": [ { "name": "", "why": "" } ],
                          "app_services": [], "capability_requests": [] },
              "permissions": [ { "name": "NSCameraUsageDescription", "text": "", "why": "" } ] },
@@ -184,6 +187,8 @@ It prints each field's length against its limit, then writes `listing.md` (reada
 
 Read `references/listing-guide.md` before writing: limits, per-field rules, what each store indexes for search, the category list, and the full age rating questionnaire. Answer every age rating item from evidence, and tell the user which answers to confirm in App Store Connect, since the declaration is theirs.
 
+App Store Connect blocks submission until the primary category, privacy policy URL, App Privacy answers and price are set, so `listing.mjs` refuses an `apple` section without `category.primary`, `privacy_policy_url`, `price` and `app_privacy`. Answer App Privacy from the same SDK evidence as the privacy policy — see `references/listing-guide.md` → **App Store submission blockers** and **App Privacy**. Ask the user for the price.
+
 ## Privacy policy page
 
 Both stores need a public privacy policy URL. Write the policy from what the project actually does — every SDK that sees user data (auth, analytics, crash reporting, payments, ads, AI), what stays on the device, how to delete the account — in the listing's language plus English when they differ, as `<project>/store/privacy-policy.md`. Keep an existing policy and only update what changed.
@@ -197,7 +202,7 @@ node <skill-dir>/scripts/privacy.mjs <project>/store/privacy-policy.md <project>
 
 It writes `site/index.html` (contents box, light and dark themes, tables) and `.github/workflows/pages.yml`, which publishes **only** `site/` — never point Pages at `docs/` or the repository root, because everything published is public even when the repository is private. GitHub Pages on a private repository needs a paid GitHub plan; on a free plan use a separate public repository holding only the page. Render the page in headless Chrome and look at it before going further.
 
-Going live is outward-facing, so propose it and let the user approve each step: commit `site/` and the workflow on a branch, merge or push to the default branch, then switch Settings → Pages → Source to "GitHub Actions" (`gh api -X POST repos/<owner>/<repo>/pages -f build_type=workflow`). The URL is `https://<owner>.github.io/<repo>/`; put it in both consoles and in the listing documents.
+Going live is outward-facing, so propose it and let the user approve each step: commit `site/` and the workflow on a branch, merge or push to the default branch, then switch Settings → Pages → Source to "GitHub Actions" (`gh api -X POST repos/<owner>/<repo>/pages -f build_type=workflow`). The URL is `https://<owner>.github.io/<repo>/`; put it in both consoles and in `privacy_policy_url` of every listing JSON.
 
 ## Store videos
 

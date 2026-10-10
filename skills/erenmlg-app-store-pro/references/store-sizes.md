@@ -20,14 +20,14 @@ Recommended export:
 
 ## Apple App Store
 
-Common iPhone portrait screenshot families include:
+The slots App Store Connect asks for before it lets you submit:
 
-- 6.9-inch / newer large iPhone class: 1320 x 2868 px or platform-current equivalent
-- 6.7-inch class: 1290 x 2796 px
-- 6.5-inch class: 1242 x 2688 px or 1284 x 2778 px
-- 5.5-inch class: 1242 x 2208 px
+| Slot | Screenshots (portrait / landscape) | App previews | Target |
+|---|---|---|---|
+| iPhone 6.1" or 6.3" | 1179 x 2556 / 2556 x 1179, 1206 x 2622 / 2622 x 1206 | 886 x 1920, 1920 x 886 | `apple/iphone` (1206 x 2622) |
+| iPad 12.9" or 13" | 2048 x 2732 / 2732 x 2048, 2064 x 2752 / 2752 x 2064 | 1200 x 1600, 1600 x 1200 | `apple/ipad` (2048 x 2732) |
 
-App Store Connect accepts 1 to 10 screenshots per device size and scales the largest provided size down for smaller devices, so one 6.9-inch or 6.7-inch set is usually enough.
+The iPad slot is required whenever the build runs on iPad (`TARGETED_DEVICE_FAMILY` contains `2`; Flutter's default `1,2` does). App Store Connect accepts 1 to 10 screenshots per slot. Any other size is rejected on upload.
 
 When the user asks for App Store-ready output, ask for target device sizes only if exact compliance is required. Otherwise, use a large portrait canvas and keep all critical text and phones within safe margins so the composition can be adapted.
 

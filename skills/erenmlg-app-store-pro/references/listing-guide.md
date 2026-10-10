@@ -172,3 +172,68 @@ Play Console form before review:
 
 A permission no feature uses, often pulled in by a plugin, is better removed from the manifest
 (`tools:node="remove"`) than declared; say so to the user.
+
+## App Store submission blockers
+
+App Store Connect will not submit a build until each of these is filled in. `listing.mjs` refuses
+an `apple` section that lacks one, so the listing documents always cover all of them:
+
+| Console message | Where | Listing key |
+|---|---|---|
+| You must select a primary category | App Information → Category | `category.primary` |
+| You must enter a Privacy Policy URL | App Privacy → Privacy Policy | `privacy_policy_url` |
+| An Admin must provide information about the app's privacy practices | App Privacy → Get Started | `app_privacy` |
+| You must choose a price tier | Pricing and Availability | `price` |
+| You must upload a screenshot for 13-inch iPad displays | version page → iPad 13" | `apple/ipad` render target |
+
+**Privacy policy URL.** The public `https://` page from **Privacy policy page** in `SKILL.md`. Until
+it is live, write the URL it will have (`https://<owner>.github.io/<repo>/`) and tell the user it
+must be reachable before review.
+
+**Price.** `"Free"`, or the base price in the base country's currency (`"USD 2.99"`). The project
+can't tell you this; ask. In-app purchases and subscriptions are set up separately and do not change
+the app's own price.
+
+## App Privacy
+
+The "nutrition label" on the product page. Answer it from every SDK and backend that sees user data,
+the same evidence as the privacy policy, and the two must agree. Data that only stays on the device
+is not "collected"; data sent off the device is, even when you never look at it.
+
+`app_privacy` in the listing:
+
+```json
+"app_privacy": {
+  "tracking": false,
+  "data": [
+    { "type": "Email Address", "purposes": ["App Functionality"], "linked": true,
+      "tracking": false, "why": "supabase_flutter auth" }
+  ]
+}
+```
+
+`"data": []` means **Data Not Collected**. `tracking: true` (data linked with other companies' data
+for ads, or shared with a data broker) also requires the App Tracking Transparency prompt and
+`NSUserTrackingUsageDescription`.
+
+Data types, by group: **Contact Info** — Name, Email Address, Phone Number, Physical Address, Other
+User Contact Info. **Health & Fitness** — Health, Fitness. **Financial Info** — Payment Info, Credit
+Info, Other Financial Info. **Location** — Precise Location, Coarse Location. **Sensitive Info**.
+**Contacts**. **User Content** — Emails or Text Messages, Photos or Videos, Audio Data, Gameplay
+Content, Customer Support, Other User Content. **Browsing History**. **Search History**.
+**Identifiers** — User ID, Device ID. **Purchases** — Purchase History. **Usage Data** — Product
+Interaction, Advertising Data, Other Usage Data. **Diagnostics** — Crash Data, Performance Data,
+Other Diagnostic Data. **Other Data**.
+
+Purposes: Third-Party Advertising, Developer's Advertising or Marketing, Analytics, Product
+Personalization, App Functionality, Other Purposes.
+
+Common SDK evidence: Firebase Analytics → Product Interaction, Device ID (Analytics); Crashlytics or
+Sentry → Crash Data, Performance Data (App Functionality); Supabase or Firebase Auth → Email
+Address, User ID (App Functionality, linked); ads SDKs (AdMob) → Advertising Data, Device ID
+(Third-Party Advertising, usually tracking); RevenueCat or StoreKit receipts sent to a server →
+Purchase History. A user's own records synced to your backend (expenses, notes) → Other User
+Content or Other Financial Info, linked.
+
+The answers are the developer's declaration and only an Admin can publish them: tell the user which
+ones to confirm in App Store Connect.

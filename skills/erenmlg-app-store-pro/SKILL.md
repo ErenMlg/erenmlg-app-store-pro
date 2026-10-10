@@ -92,8 +92,8 @@ Default: `["apple/iphone", "google/phone"]`. The rest are opt-in:
 
 | target | size | frame |
 |---|---|---|
-| `apple/iphone` | 1284×2778 | iPhone |
-| `apple/ipad` | 2048×2732 | iPhone |
+| `apple/iphone` | 1206×2622 (6.3") | iPhone |
+| `apple/ipad` | 2048×2732 (12.9"/13") | iPhone |
 | `google/phone` | 1080×1920 | Android |
 | `google/tablet7` | 1080×1920 | Android |
 | `google/tablet10` | 1440×2560 | Android |

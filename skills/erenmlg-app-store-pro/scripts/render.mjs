@@ -99,7 +99,7 @@ const ROTATIONS = new Set(['flat', 'subtle', 'left', 'right', 'dual']);
 // afford a big bleed (PocketPal look); a wide canvas (iPad 3:4) must keep it near zero
 // or the phone's lower half gets cut off. Used as the default device_bleed per target.
 const TARGETS = {
-  'apple/iphone':    { dir: 'apple/iphone',     size: [1284, 2778], platform: 'ios',     bleed: 0.06 },
+  'apple/iphone':    { dir: 'apple/iphone',     size: [1206, 2622], platform: 'ios',     bleed: 0.06 },
   'apple/ipad':      { dir: 'apple/ipad',       size: [2048, 2732], platform: 'ios',     bleed: 0 },
   'google/phone':    { dir: 'google/phone',     size: [1080, 1920], platform: 'android', bleed: 0.06 },
   'google/tablet7':  { dir: 'google/tablet-7',  size: [1080, 1920], platform: 'android', bleed: 0.06 },
